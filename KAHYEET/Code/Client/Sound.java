@@ -1,10 +1,16 @@
 import javax.sound.sampled.*;
 import java.io.File;
 
+/**
+ * Sound class handles the loading and playing of sound files.
+ */
 public class Sound {
     private Clip clip;
 
-    // Constructor để load file âm thanh
+    /**
+     * Constructor to load a sound file.
+     * @param filePath The path to the sound file.
+     */
     public Sound(String filePath) {
         try {
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File("sound/" + filePath).getAbsoluteFile());
@@ -15,24 +21,30 @@ public class Sound {
         }
     }
 
-    // Phát âm thanh một lần
+    /**
+     * Plays the sound once.
+     */
     public void playOnce() {
         if (clip != null) {
-            clip.setFramePosition(0); // Reset về đầu
+            clip.setFramePosition(0); // Reset to the beginning
             clip.start();
         }
     }
 
-    // Phát âm thanh lặp lại
+    /**
+     * Plays the sound in a continuous loop.
+     */
     public void playLoop() {
         if (clip != null) {
-            clip.setFramePosition(0); // Reset về đầu
-            clip.loop(Clip.LOOP_CONTINUOUSLY); // Lặp lại liên tục
+            clip.setFramePosition(0); // Reset to the beginning
+            clip.loop(Clip.LOOP_CONTINUOUSLY); // Loop continuously
             clip.start();
         }
     }
 
-    // Dừng phát âm thanh
+    /**
+     * Stops playing the sound.
+     */
     public void stop() {
         if (clip != null) {
             clip.stop();

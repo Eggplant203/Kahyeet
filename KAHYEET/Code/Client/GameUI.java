@@ -7,27 +7,38 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+/**
+ * GameUI class represents the user interface for the Kahyeet game.
+ * It handles displaying questions, managing the countdown timer, and processing user answers.
+ */
 public class GameUI extends Frame {
     private Client client;
     private String username;
     private List<Question> questions; // Store questions
-    private Label scoreLabel, timerLabel; // Added timerLabel to show seconds remaining
-    private JTextArea questionLabel;
-    private int currentQuestionIndex = 0;
-    private List<Button> optionButtons = new ArrayList<>();
-    private long questionStartTime; // Track the start time for each question
-    private int score = 0; // Track the player's score
+    private Label scoreLabel, timerLabel; // Labels for displaying score and timer
+    private JTextArea questionLabel; // Text area for displaying questions
+    private int currentQuestionIndex = 0; // Index of the current question
+    private List<Button> optionButtons = new ArrayList<>(); // Buttons for answer options
+    private long questionStartTime; // Start time for each question
+    private int score = 0; // Player's score
     private int questionTimer; // Time limit for each question in milliseconds
     private int wait2StartTimer = 3000; // Time limit for waiting to start the game
     private Timer countdownTimer; // Timer for countdown
     private JProgressBar progressBar; // Progress bar for countdown timer
     private int remainingTime; // Time left for the current question
-    private boolean isGameStarted = false;
+    private boolean isGameStarted = false; // Flag to check if the game has started
 
     private Sound correctSound;
     private Sound wrongSound;
     private Sound neutralSound;
 
+    /**
+     * Constructor for GameUI.
+     * @param client The client object.
+     * @param username The username of the player.
+     * @param questionTimer The time limit for each question.
+     * @param questions The list of questions.
+     */
     public GameUI(Client client, String username, int questionTimer, List<Question> questions) {
         this.client = client;
         this.username = username;
@@ -37,40 +48,40 @@ public class GameUI extends Frame {
         setTitle("Kahyeet! - " + username);
         setSize(500, 350);
         setLayout(new GridLayout(7, 1)); // Adjusted to fit new layout
- 
-        // Load các hiệu ứng âm thanh
+
+        // Load sound effects
         correctSound = new Sound("correct_answer.wav");
         wrongSound = new Sound("wrong_answer.wav");
         neutralSound = new Sound("neutral_answer.wav");
-    
+
         // Panel to hold score and timer labels
         Panel labelPanel = new Panel(new BorderLayout());
         scoreLabel = new Label("Points: " + score);
         scoreLabel.setAlignment(Label.RIGHT);
         scoreLabel.setPreferredSize(new Dimension(getWidth() / 2, scoreLabel.getHeight()));
         labelPanel.add(scoreLabel, BorderLayout.EAST);
-    
+
         timerLabel = new Label("Time: " + wait2StartTimer / 1000 + "s");
         timerLabel.setAlignment(Label.LEFT);
         labelPanel.add(timerLabel, BorderLayout.WEST);
-    
+
         // Progress bar panel for countdown
         Panel progressBarPanel = new Panel(new BorderLayout());
         progressBar = new JProgressBar(0, wait2StartTimer);
         progressBar.setValue(wait2StartTimer);
         progressBar.setForeground(Color.GREEN);
         progressBarPanel.add(progressBar, BorderLayout.CENTER);
-    
+
         add(labelPanel);
         add(progressBarPanel);
         Font boldFont = new Font("Arial", Font.BOLD, 14);
-        questionLabel = new JTextArea(""); // Sử dụng TextArea
+        questionLabel = new JTextArea(""); // Use TextArea for question display
         questionLabel.setFont(boldFont);
-        questionLabel.setEditable(false); // Không cho phép chỉnh sửa
-        questionLabel.setWrapStyleWord(true); // Tự động xuống dòng
-        questionLabel.setLineWrap(true); // Tự động xuống dòng
+        questionLabel.setEditable(false); // Make it non-editable
+        questionLabel.setWrapStyleWord(true); // Enable word wrap
+        questionLabel.setLineWrap(true); // Enable line wrap
         questionLabel.setFocusable(false);
-        JScrollPane scrollPane = new JScrollPane(questionLabel); // Sử dụng JScrollPane để chứa JTextArea
+        JScrollPane scrollPane = new JScrollPane(questionLabel); // Use JScrollPane to contain JTextArea
         add(scrollPane, BorderLayout.CENTER);
 
         for (int i = 0; i < 4; i++) {
@@ -94,6 +105,9 @@ public class GameUI extends Frame {
         wait2Start();
     }
 
+    /**
+     * Displays the current question and its options.
+     */
     private void displayQuestion() {
         if (currentQuestionIndex >= questions.size()) {
             if (!client.isFinished()) {
@@ -118,6 +132,9 @@ public class GameUI extends Frame {
         startCountdown(questionTimer); // Start countdown timer
     }
 
+    /**
+     * Waits for a specified time before starting the game.
+     */
     private void wait2Start() {
         questionLabel.setText("Waiting " + wait2StartTimer / 1000 + " s to start the game...\nTime to answer each question is " + questionTimer/1000 + " s");
         for (Button button : optionButtons) {
@@ -126,6 +143,10 @@ public class GameUI extends Frame {
         startCountdown(wait2StartTimer);
     }
 
+    /**
+     * Starts the countdown timer.
+     * @param timer The time limit for the countdown.
+     */
     private void startCountdown(int timer) {
         remainingTime = timer;
         progressBar.setMaximum(timer);
@@ -154,12 +175,19 @@ public class GameUI extends Frame {
         countdownTimer.start();
     }
 
+    /**
+     * Stops the countdown timer.
+     */
     private void stopCountdown() {
         if (countdownTimer != null) {
             countdownTimer.stop();
         }
     }
 
+    /**
+     * Sends the selected answer to the server and processes the result.
+     * @param answerIndex The index of the selected answer.
+     */
     private void sendAnswer(int answerIndex) {
         stopCountdown(); // Stop countdown if answer is submitted
 
@@ -211,6 +239,12 @@ public class GameUI extends Frame {
         resetAndDisplayNextQuestion();
     }
 
+    /**
+     * Calculates the points based on response time and question timer.
+     * @param responseTimeMillis The response time in milliseconds.
+     * @param questionTimerMillis The question timer in milliseconds.
+     * @return The calculated points.
+     */
     private int calculatePoints(long responseTimeMillis, int questionTimerMillis) {
         double responseTime = responseTimeMillis / 1000.0; // Convert to seconds
         double questionTimer = questionTimerMillis / 1000.0; // Convert to seconds
@@ -219,6 +253,9 @@ public class GameUI extends Frame {
         else return (int) Math.round(Math.max(rawScore, 0));
     }
 
+    /**
+     * Resets the UI and displays the next question.
+     */
     private void resetAndDisplayNextQuestion() {
         for (Button button : optionButtons) {
             button.setBackground(null); // Reset button background color
@@ -232,15 +269,25 @@ public class GameUI extends Frame {
         displayQuestion();
     }
 
+    /**
+     * Gets the current score.
+     * @return The current score.
+     */
     public int getScore() {
         return score;
     }
 
+    /**
+     * Finishes the game.
+     */
     public void finish() {
         currentQuestionIndex = questions.size() - 1; // Set the current question index to the final question (end of quiz)
         sendAnswer(-2);
     }
 
+    /**
+     * Closes the game UI.
+     */
     public void close() {
         setVisible(false);
         dispose();

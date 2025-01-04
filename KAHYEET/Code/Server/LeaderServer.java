@@ -8,11 +8,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * LeaderServer class represents the server-side leaderboard user interface for the Kahyeet game.
+ * It displays the scores of players in a table, highlighting disconnected users.
+ */
 public class LeaderServer extends JFrame {
     private static boolean windowOpen = false;
-    private DefaultTableModel model; // Lưu model của bảng để có thể cập nhật lại khi cần
-    private List<ScoreEntry> scores = new ArrayList<>(); // Lưu trữ danh sách ScoreEntry để dùng trong cellRenderer
+    private DefaultTableModel model; // Model of the table to update when needed
+    private List<ScoreEntry> scores = new ArrayList<>(); // List of ScoreEntry to use in cellRenderer
 
+    /**
+     * Constructor for LeaderServer.
+     * Initializes the leaderboard window and displays the scores.
+     */
     public LeaderServer() {
         windowOpen = true;
         setTitle("Leaderboard - SERVER");
@@ -30,21 +38,21 @@ public class LeaderServer extends JFrame {
         JTable table = new JTable(model);
         table.getTableHeader().setReorderingAllowed(false);
 
-        // Đọc và hiển thị bảng xếp hạng lần đầu
+        // Read and display the leaderboard initially
         updateLeaderboard();
 
-        // Thiết lập bộ render cho bảng
+        // Set up the cell renderer for the table
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel cell = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 cell.setHorizontalAlignment(JLabel.CENTER);
 
-                // Sử dụng đối tượng ScoreEntry từ danh sách scores thay vì từ model của bảng
+                // Use ScoreEntry object from the scores list instead of the table model
                 ScoreEntry entry = scores.get(row);
                 String rank = (String) table.getValueAt(row, 0);
 
-                // Tô màu theo rank hoặc trạng thái
+                // Color the cell based on rank or status
                 if (entry.isDisconnected()) cell.setBackground(Color.RED);
                 else if (rank.equals("GOLD")) cell.setBackground(Color.YELLOW);
                 else if (rank.equals("SILVER")) cell.setBackground(Color.LIGHT_GRAY);
@@ -65,12 +73,14 @@ public class LeaderServer extends JFrame {
         setVisible(true);
     }
 
-    // Phương thức cập nhật lại bảng xếp hạng
+    /**
+     * Updates the leaderboard by reading the latest scores from the file.
+     */
     public void updateLeaderboard() {
-        model.setRowCount(0); // Xóa các hàng hiện tại
-        scores = readScoresFromFile(); // Đọc điểm mới từ file
+        model.setRowCount(0); // Clear current rows
+        scores = readScoresFromFile(); // Read new scores from file
 
-        // Sắp xếp và thêm dữ liệu vào bảng
+        // Sort and add data to the table
         scores.sort((s1, s2) -> Integer.compare(s2.getScore(), s1.getScore()));
         for (int i = 0; i < scores.size(); i++) {
             ScoreEntry entry = scores.get(i);
@@ -84,6 +94,10 @@ public class LeaderServer extends JFrame {
         }
     }
 
+    /**
+     * Reads the scores from the file and returns a list of ScoreEntry objects.
+     * @return A list of ScoreEntry objects.
+     */
     private List<ScoreEntry> readScoresFromFile() {
         List<ScoreEntry> scores = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader("scores.txt"))) {
@@ -111,11 +125,20 @@ public class LeaderServer extends JFrame {
         return scores;
     }    
 
+    /**
+     * ScoreEntry class represents a single entry in the leaderboard.
+     */
     private class ScoreEntry {
         private final String username;
         private final int score;
         private final boolean isDisconnected;
 
+        /**
+         * Constructor for ScoreEntry.
+         * @param username The username of the player.
+         * @param score The score of the player.
+         * @param isDisconnected Whether the player is disconnected.
+         */
         public ScoreEntry(String username, int score, boolean isDisconnected) {
             this.username = username;
             this.score = score;
@@ -135,6 +158,10 @@ public class LeaderServer extends JFrame {
         }
     }
 
+    /**
+     * Checks if the leaderboard window is open.
+     * @return True if the window is open, false otherwise.
+     */
     public boolean isWindowOpen() {
         return windowOpen;
     }

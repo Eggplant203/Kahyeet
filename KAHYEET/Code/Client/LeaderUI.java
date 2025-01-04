@@ -5,7 +5,17 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * LeaderUI class represents the leaderboard user interface for the Kahyeet game.
+ * It displays the scores of players in a table, highlighting the current user and disconnected users.
+ */
 public class LeaderUI extends JFrame {
+
+    /**
+     * Constructor for LeaderUI.
+     * @param currentUsername The username of the current player.
+     * @param scoreData The score data as a string.
+     */
     public LeaderUI(String currentUsername, String scoreData) {
         setTitle("Leaderboard");
         setSize(new Dimension(400, 300));
@@ -76,6 +86,11 @@ public class LeaderUI extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Parses the score data string into a list of ScoreEntry objects.
+     * @param scoreData The score data as a string.
+     * @return A list of ScoreEntry objects.
+     */
     private List<ScoreEntry> parseScoreData(String scoreData) {
         List<ScoreEntry> scores = new ArrayList<>();
         String[] lines = scoreData.split("\n");
@@ -97,11 +112,20 @@ public class LeaderUI extends JFrame {
         return scores;
     }
 
+    /**
+     * ScoreEntry class represents a single entry in the leaderboard.
+     */
     private static class ScoreEntry {
         private final String username;
         private final int score;
         private final boolean isDisconnected;
 
+        /**
+         * Constructor for ScoreEntry.
+         * @param username The username of the player.
+         * @param score The score of the player.
+         * @param isDisconnected Whether the player is disconnected.
+         */
         public ScoreEntry(String username, int score, boolean isDisconnected) {
             this.username = username;
             this.score = score;

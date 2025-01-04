@@ -64,9 +64,9 @@ public class Server {
 
         synchronized (lock) {
             try {
-            lock.wait();
+                lock.wait();
             } catch (InterruptedException e) {
-            e.printStackTrace();
+                e.printStackTrace();
             }
         }
 
@@ -85,9 +85,12 @@ public class Server {
         } catch (IOException e) {
             System.out.println("Server stopped.");
             broadcast("Server has stopped.");
-            }
         }
+    }
 
+    /**
+     * Displays the server management UI.
+     */
     private static void showServerUI() {
         JFrame frame = new JFrame("Kahyeet! Server Management");
         frame.setSize(800, 460);
@@ -217,7 +220,7 @@ public class Server {
                     if (!file.exists()) {
                         JOptionPane.showMessageDialog(null, "File questions.txt does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
                     } else {
-                        Desktop.getDesktop().open(file); // Mở file với ứng dụng mặc định
+                        Desktop.getDesktop().open(file); // Open file with default application
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "An error occurred while opening the file.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -228,42 +231,25 @@ public class Server {
 
         shuffleQuestionsCheckBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (shuffleQuestionsCheckBox.isSelected()) {
-                    shuffleQuestions = true;
-                } else {
-                    shuffleQuestions = false;
-                }
+                shuffleQuestions = shuffleQuestionsCheckBox.isSelected();
             }
         });
 
-    
         shuffleAnswersCheckBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (shuffleAnswersCheckBox.isSelected()) {
-                    shuffleAnswers = true;
-                } else {
-                    shuffleAnswers = false;
-                }
+                shuffleAnswers = shuffleAnswersCheckBox.isSelected();
             }
         });
 
         dontShowTrueAnswersCheckBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (dontShowTrueAnswersCheckBox.isSelected()) {
-                    dontShowTrueAnswers = true;
-                } else {
-                    dontShowTrueAnswers = false;
-                }
+                dontShowTrueAnswers = dontShowTrueAnswersCheckBox.isSelected();
             }
         });
 
         noBonusPointCheckBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (noBonusPointCheckBox.isSelected()) {
-                    noBonusPoint = true;
-                } else {
-                    noBonusPoint = false;
-                }
+                noBonusPoint = noBonusPointCheckBox.isSelected();
             }
         });
 
@@ -277,8 +263,8 @@ public class Server {
         PrintStream printStream = new PrintStream(new OutputStream() {
             @Override
             public void write(int b) throws IOException {
-            terminalOutput.append(String.valueOf((char) b));
-            terminalOutput.setCaretPosition(terminalOutput.getDocument().getLength());
+                terminalOutput.append(String.valueOf((char) b));
+                terminalOutput.setCaretPosition(terminalOutput.getDocument().getLength());
             }
         });
         System.setOut(printStream);
@@ -301,18 +287,22 @@ public class Server {
         frame.setVisible(true);
     }
 
+    /**
+     * Updates the count of completed clients.
+     */
     public static void updateCompletedClientsCount() {
         if (!isGameStarted) {
-            if (totalClients > 0) {
-                startButton.setEnabled(true);
-            } else {
-                startButton.setEnabled(false);
-            }
+            startButton.setEnabled(totalClients > 0);
         }
         completedClients = (int) clients.stream().filter(client -> client.getPlayer() != null && client.getPlayer().isFinished()).count();
         completedLabel.setText("Completed: " + completedClients + "/" + totalClients);
     }
 
+    /**
+     * Checks if a username is already taken.
+     * @param username The username to check.
+     * @return True if the username is taken, false otherwise.
+     */
     public static boolean isUsernameTaken(String username) {
         for (ClientHandler client : clients) {
             if (client.getPlayer() != null && client.getPlayer().getUsername().equals(username)) {
@@ -322,10 +312,17 @@ public class Server {
         return false;
     }
 
+    /**
+     * Removes a client by username.
+     * @param username The username of the client to remove.
+     */
     public static void removeClient(String username) {
         clients.removeIf(client -> client.getPlayer() != null && client.getPlayer().getUsername().equals(username));
     }
 
+    /**
+     * Updates the list of waiting players.
+     */
     public static void updateWaitingPlayers() {
         StringBuilder usernames = new StringBuilder("UPDATE_WAITING_LIST:");
         for (ClientHandler client : clients) {
@@ -336,14 +333,16 @@ public class Server {
         broadcast(usernames.toString());
     }
 
+    /**
+     * Checks if all players have finished and updates the leaderboard.
+     */
     public static void checkAllPlayersFinished() {
         updateCompletedClientsCount();
         if (leaderServer != null && leaderServer.isWindowOpen()) {
             leaderServer.updateLeaderboard();
         }
-        if (completedClients == totalClients && totalClients !=0 && !isShowLeaderboard) {
+        if (completedClients == totalClients && totalClients != 0 && !isShowLeaderboard) {
             finishButton.setEnabled(false);
-            // Gợi Phương thức gửi file score đến client ở class ClientHandler
             broadcast("SHOW_LEADERBOARD");
             isShowLeaderboard = true;
             for (ClientHandler client : clients) {
@@ -352,6 +351,10 @@ public class Server {
         }
     }
 
+    /**
+     * Adds or removes a client.
+     * @param add True to add a client, false to remove.
+     */
     public static void addClient(boolean add) {
         if (add) totalClients++;
         else {
@@ -363,6 +366,10 @@ public class Server {
         }
     }
 
+    /**
+     * Broadcasts a message to all clients.
+     * @param message The message to broadcast.
+     */
     public static void broadcast(String message) {
         System.out.println("Message 2 Player: " + message);
         for (ClientHandler client : clients) {
@@ -370,11 +377,18 @@ public class Server {
         }
     }
 
+    /**
+     * Checks if the game has started.
+     * @return True if the game has started, false otherwise.
+     */
     public static boolean isGameStarted() {
         return isGameStarted;
     }
 
-    // Phương thức hỗ trợ để kick player
+    /**
+     * Kicks a player by username.
+     * @param username The username of the player to kick.
+     */
     private static void kickPlayer(String username) {
         ClientHandler clientToKick = null;
         for (ClientHandler client : clients) {
@@ -389,10 +403,19 @@ public class Server {
         }
     }
 
+    /**
+     * Checks if a player has been kicked.
+     * @param username The username to check.
+     * @return True if the player has been kicked, false otherwise.
+     */
     public static boolean isPlayerKicked(String username) {
         return kickedPlayers.contains(username);
     }
 
+    /**
+     * Opens the kick player frame.
+     * @param parentFrame The parent frame.
+     */
     private static void openKickPlayerFrame(JFrame parentFrame) {
         kickFrame = new JDialog(parentFrame, "Kick Player", true);
         kickFrame.setSize(300, 400);
@@ -403,6 +426,10 @@ public class Server {
         kickFrame.setVisible(true);
     }
 
+    /**
+     * Updates the player list in the kick player frame.
+     * @param kickFrame The kick player frame.
+     */
     private static void updatePlayerList(JDialog kickFrame) {
         JPanel playerListPanel = new JPanel(new BorderLayout());
 

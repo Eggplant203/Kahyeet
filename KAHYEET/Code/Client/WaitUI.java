@@ -2,12 +2,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * WaitUI class represents the waiting room user interface for the Kahyeet game.
+ * It displays the list of players waiting to join the game and plays background music.
+ */
 public class WaitUI extends JFrame {
     private String username;
     private JTextArea leftWaitingPlayersArea;
     private JTextArea rightWaitingPlayersArea;
     private Sound backgroundMusic;
 
+    /**
+     * Constructor for WaitUI.
+     * @param username The username of the current player.
+     */
     public WaitUI(String username) {
         this.username = username;
 
@@ -39,11 +47,15 @@ public class WaitUI extends JFrame {
 
         setVisible(true);
 
-        // Phát nhạc nền khi mở phòng chờ
+        // Play background music when the waiting room is opened
         backgroundMusic = new Sound("background_wait.wav");
         backgroundMusic.playLoop();
     }
 
+    /**
+     * Updates the list of waiting players displayed in the UI.
+     * @param playerUsernames The list of usernames of the waiting players.
+     */
     public void updateWaitingPlayers(List<String> playerUsernames) {
         leftWaitingPlayersArea.setText("");
         rightWaitingPlayersArea.setText("");
@@ -56,10 +68,13 @@ public class WaitUI extends JFrame {
         }
     }
 
+    /**
+     * Closes the waiting room UI and stops the background music.
+     */
     public void close() {
         setVisible(false);
         dispose();
-        // Dừng nhạc nền khi đóng phòng chờ
+        // Stop background music when the waiting room is closed
         if (backgroundMusic != null) {
             backgroundMusic.stop();
         }

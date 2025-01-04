@@ -8,6 +8,10 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
+/**
+ * Client class represents the client-side of the Kahyeet game.
+ * It handles the connection to the server, communication, and game logic.
+ */
 public class Client {
     private Socket socket;
     private BufferedReader reader;
@@ -28,20 +32,31 @@ public class Client {
     private Sound leaderboardSound;
     private Sound backgroundMusic;
 
+    /**
+     * Constructor for Client.
+     * @param loginUI The login UI.
+     * @param username The username of the player.
+     * @param address The server address.
+     * @param port The server port.
+     */
     public Client(LoginUI loginUI, String username, String address, int port) {
         this.loginUI = loginUI;
         this.username = username;
         connectToServer(address, port);
     }
 
-    // Kết nối đến server và bắt đầu giao tiếp
+    /**
+     * Connects to the server and starts communication.
+     * @param address The server address.
+     * @param port The server port.
+     */
     private void connectToServer(String address, int port) {
         try {
             socket = new Socket(address, port);
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream(), true);
 
-            // Gửi username đến server
+            // Send username to server
             sendMessageToServer("USERNAME:" + username);
             String serverResponse = reader.readLine();
             if (serverResponse != null && serverResponse.startsWith("ERROR")) {
@@ -53,7 +68,7 @@ public class Client {
             leaderboardSound = new Sound("show_leaderboard.wav");
             backgroundMusic = new Sound("background_game.wav");
             
-            // Bắt đầu một thread để lắng nghe tin nhắn từ server
+            // Start a thread to listen for messages from the server
             Thread listenThread = new Thread(new ClientListener());
             listenThread.start();
             waitUI = new WaitUI(username);
@@ -65,9 +80,12 @@ public class Client {
         }
     }
 
-    // Phương thức gửi tin nhắn đến server
+    /**
+     * Sends a message to the server.
+     * @param message The message to send.
+     */
     public void sendMessageToServer(String message) {
-        writer.println(message);  // Gửi tin nhắn tới server
+        writer.println(message);  // Send message to server
         System.out.println("Sent to server: " + message);
     }
 
@@ -115,22 +133,24 @@ public class Client {
         this.noBonusPoint = noBonusPoint;
     }
 
-    // Phương thức để xử lý việc đóng các cửa sổ và thoát chương trình
+    /**
+     * Handles connection loss by showing a dialog and closing the application.
+     */
     private void handleConnectionLoss() {
-        // Tạo một JOptionPane thông báo kết nối bị mất
+        // Create a JOptionPane to notify about connection loss
         JOptionPane optionPane = new JOptionPane("Connection to server lost.", JOptionPane.WARNING_MESSAGE);
         JDialog dialog = optionPane.createDialog(loginUI, "Connection Lost");
         dialog.setAlwaysOnTop(true);
         
-        // Tạo một Timer để tự động đóng dialog
+        // Create a Timer to automatically close the dialog
         Timer timer = new Timer(2000, e -> dialog.dispose());
-        timer.setRepeats(false);  // Chạy một lần rồi dừng
+        timer.setRepeats(false);  // Run once and stop
         
-        timer.start();  // Bắt đầu Timer
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);  // Cho phép đóng hộp thoại
-        dialog.setVisible(true);  // Hiển thị hộp thoại
+        timer.start();  // Start the Timer
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);  // Allow dialog to be closed
+        dialog.setVisible(true);  // Show the dialog
 
-        // Đóng các cửa sổ khác và thoát chương trình
+        // Close other windows and exit the application
         if (waitUI != null) {
             waitUI.close();
         }
@@ -140,7 +160,9 @@ public class Client {
         System.exit(0);
     }
 
-    // Lớp lắng nghe tin nhắn từ server
+    /**
+     * ClientListener class listens for messages from the server.
+     */
     private class ClientListener implements Runnable {
         @Override
         public void run() {
@@ -201,7 +223,7 @@ public class Client {
                             waitUI.close();
                         }
                         gameUI = new GameUI(Client.this, username, getQuestionTimer(), questions);
-                        // Phát nhạc nền khi vào GameUI
+                        // Play background music when entering GameUI
                         backgroundMusic.playLoop();
                     // TIMER
                     } else if (serverMessage.startsWith("TIMER:")) {
@@ -228,7 +250,7 @@ public class Client {
                         leaderboardSound.playOnce();
                         new LeaderUI(username, scoreData.toString());  // Pass accumulated score data to LeaderUI
                     }
-                    // them cac tin nhan tu server o day
+                    // Add more server messages here
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -237,6 +259,12 @@ public class Client {
         }
     }
 
+    /**
+     * Shuffles the options with prefixes and updates the correct answer index.
+     * @param options The list of options.
+     * @param correctIndex The index of the correct answer.
+     * @return The new index of the correct answer after shuffling.
+     */
     private int shuffleOptionsWithPrefixes(List<String> options, int correctIndex) {
         List<String> prefixedOptions = new ArrayList<>();
         int newCorrectAnswerIndex = correctIndex;
@@ -270,6 +298,6 @@ public class Client {
     }
 
     public int getQuestionTimer() {
-        return questionTimer*1000;
+        return questionTimer * 1000;
     }
 }

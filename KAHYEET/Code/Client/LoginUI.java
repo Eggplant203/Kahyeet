@@ -6,6 +6,10 @@ public class LoginUI extends JFrame {
     private JButton loginButton;
     private Sound errorSound;
 
+    /**
+     * Constructor for LoginUI.
+     * Initializes the login window with fields for username, server address, and port.
+     */
     public LoginUI() {
         setTitle("Kahyeet! Login");
         setSize(400, 250);
@@ -42,6 +46,7 @@ public class LoginUI extends JFrame {
         loginButton.setBounds(140, 150, 100, 30);
         add(loginButton);
 
+        // Add action listener to the login button
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String username = usernameField.getText().trim();
@@ -67,16 +72,31 @@ public class LoginUI extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Connects to the client with the provided username, address, and port.
+     * @param username The username of the player.
+     * @param address The server address.
+     * @param port The server port.
+     * @return True if connected successfully, false otherwise.
+     */
     private boolean connectToClient(String username, String address, int port) {
         Client client = new Client(this, username, address, port);
         return client.isConnected();
     }
 
+    /**
+     * Displays a message dialog with the provided message.
+     * @param message The message to display.
+     */
     public void showMessage(String message) {
         errorSound.playOnce();
         JOptionPane.showMessageDialog(this, message);
     }
 
+    /**
+     * Main method to run the LoginUI.
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         new LoginUI();
     }
